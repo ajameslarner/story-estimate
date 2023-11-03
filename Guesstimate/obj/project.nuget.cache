@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ZYNwQbR7lxpvfRNumfi9LiShY6p6bw+h1zQq+zJUhbCFlCK660emdSmK1y3wj2lbNdPdNctGmiBHK1KDVbWUKA==",
+  "dgSpecHash": "cupzD7bNmE1L0z20uJMHxyONJqdNmfuQ5XOLWl09y1eJu9d4AscKlVM+70WHDE2QkR0G7qZjAHrxbWEJYoaM2g==",
   "success": true,
-  "projectFilePath": "c:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj",
+  "projectFilePath": "C:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Anthony.Larner\\.nuget\\packages\\microsoft.aspnetcore.connections.abstractions\\7.0.13\\microsoft.aspnetcore.connections.abstractions.7.0.13.nupkg.sha512",
     "C:\\Users\\Anthony.Larner\\.nuget\\packages\\microsoft.aspnetcore.http.connections.client\\7.0.13\\microsoft.aspnetcore.http.connections.client.7.0.13.nupkg.sha512",

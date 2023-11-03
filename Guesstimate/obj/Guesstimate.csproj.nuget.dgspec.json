@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj": {}
+    "C:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj": {}
   },
   "projects": {
-    "c:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj": {
+    "C:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj",
+        "projectUniqueName": "C:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj",
         "projectName": "Guesstimate",
-        "projectPath": "c:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj",
+        "projectPath": "C:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\Guesstimate.csproj",
         "packagesPath": "C:\\Users\\Anthony.Larner\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\obj\\",
+        "outputPath": "C:\\Users\\Anthony.Larner\\Documents\\LocalDev\\Guesstimate\\Guesstimate\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Anthony.Larner\\AppData\\Roaming\\NuGet\\NuGet.Config",

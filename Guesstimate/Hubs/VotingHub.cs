@@ -71,7 +71,6 @@ public class VotingHub : Hub
         }
 
         await Clients.All.SendAsync("ClearVotes");
-        
     }
 
     public async Task Vote(string vote)

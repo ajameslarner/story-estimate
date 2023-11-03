@@ -25,11 +25,19 @@
     #centered-container {
         text-align: center;
     }
+
+    .sticky-bottom {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        padding: 20px;
+        text-align: left;
+    }
 </style>
 
 <div class="container">
     <div class="row">
-        <div style="text-align: center;" class="col-md-4">
+        <div style="text-align: center;" class="col-md-6">
             <h2>Storypoint Estimator</h2>
             <hr />
             <div class="form-group">
@@ -56,12 +64,6 @@
                 }
             </div>
             <hr />
-            @* @if (_hasJoined)
-            {
-                <label>
-                    <input id="input-field" @bind="_message" placeholder="Say something..." /> <button @onclick="Send">Send</button>
-                </label>
-            } *@
             <ul class="no-bullets">
                 @foreach (string message in _messages)
                 {
@@ -103,6 +105,15 @@
         <h4 style="color: red;">Client Unauthorised</h4>
     }
 </div>
+
+@* <div class="sticky-bottom">
+    @if (_hasJoined)
+    {
+        <label>
+            <input id="input-field" @bind="_message" placeholder="Say something..." /> <button @onclick="Send">Send</button>
+        </label>
+    }
+</div> *@
 
 @code {
     private List<string> _messages = new();
