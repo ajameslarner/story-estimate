@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Guesstimate;
+namespace StoryEstimate;
 
 public struct Session
 {

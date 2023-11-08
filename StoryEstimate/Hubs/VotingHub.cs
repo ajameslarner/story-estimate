@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Intrinsics.X86;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Guesstimate;
+namespace StoryEstimate;
 
 public class VotingHub : Hub
 {

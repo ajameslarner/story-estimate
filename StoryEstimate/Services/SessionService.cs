@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Guesstimate;
+namespace StoryEstimate;
 
 // Singleton
 public class SessionService
