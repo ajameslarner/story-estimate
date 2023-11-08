@@ -1,4 +1,4 @@
-# Guesstimate - Story Point Estimator
+# story-estimator - Story Point Estimator
 
 This is a Blazor .NET Core Web App that uses SignalR to provide a small platform for users to connect to and vote on story point estimations for development cards.
 
