@@ -3,11 +3,11 @@
 namespace StoryEstimate;
 
 // Singleton
-public class SessionService
+public class ClientService
 {
     public ConcurrentDictionary<string, Session> Sessions { get; private set;} = new();
 
-    public void CreateNewSession(Session session)
+    public void AddClientSession(Session session)
     {
         if (session.Id is null) return;
 

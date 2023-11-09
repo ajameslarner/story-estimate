@@ -104,6 +104,10 @@
     {
         <h4 style="color: red;">Client Unauthorised</h4>
     }
+    @if (_allVotesIn)
+    {
+        <h4 style="color: green;">All votes are in!</h4>
+    }
 </div>
 
 @* <div class="sticky-bottom">
@@ -128,6 +132,7 @@
     private string _vote;
     private bool _hasVoted;
     private bool _unauthorised;
+    private bool _allVotesIn;
 
     protected override async Task OnInitializedAsync()
     {
@@ -148,19 +153,34 @@
         _connection.On<string>("ReceiveVote", (vote) =>
         {
             _votes.Add(vote);
+            _allVotesIn = false;
+            InvokeAsync(StateHasChanged);
+        });
+
+        _connection.On<string>("AllVotesReceived", (vote) =>
+        {
+            _allVotesIn = true;
             InvokeAsync(StateHasChanged);
         });
 
         _connection.On("ClearVotes", () =>
         {
             _votes.Clear();
+            InvokeAsync(StateHasChanged);
+        });
+
+        _connection.On("Reset", () =>
+        {
+            _votes.Clear();
             _hasVoted = false;
+            _allVotesIn = false;
             InvokeAsync(StateHasChanged);
         });
 
         _connection.On<string>("ReceiveClient", (name) =>
         {
             _clients.Add(name);
+            _allVotesIn = false;
             InvokeAsync(StateHasChanged);
         });
 

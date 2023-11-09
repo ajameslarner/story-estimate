@@ -1,32 +1,35 @@
-﻿using System.Runtime.Intrinsics.X86;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
+using StoryEstimate.Models;
+using StoryEstimate.Services;
 
 namespace StoryEstimate;
 
 public class VotingHub : Hub
 {
-    private readonly SessionService _sessionService;
+    private readonly IConnectionManager<Client> _clientManager;
 
-    public VotingHub(SessionService sessionService)
+    public VotingHub(IConnectionManager<Client> clientManager)
     {
-        _sessionService = sessionService;
+        _clientManager = clientManager;
     }
 
     public override async Task OnConnectedAsync()
     {
         await UpdateClient();
 
+        _clientManager.AddConnection(Context.ConnectionId);
+
         await base.OnConnectedAsync();
     }
 
     private async Task UpdateClient()
     {
-        foreach (var item in _sessionService.Sessions)
+        foreach (var item in _clientService.Sessions)
         {
             await Clients.Caller.SendAsync("ReceiveClient", item.Value.Name);
         }
 
-        foreach (var item in _sessionService.Sessions)
+        foreach (var item in _clientService.Sessions)
         {
             if (item.Value.Voted)
             {
@@ -37,7 +40,7 @@ public class VotingHub : Hub
 
     public async Task Send(string message)
     {
-        if (_sessionService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
+        if (_clientService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
         {
             await Clients.All.SendAsync("ReceiveMessage", $"{session.Name}: {message}");
         }   
@@ -46,7 +49,7 @@ public class VotingHub : Hub
     public async Task Join(string name)
     {
         var session = new Session { Id = Context.ConnectionId, Name = name };
-        _sessionService.AddClientSession(session);
+        _clientService.AddClientSession(session);
 
         await Clients.Caller.SendAsync("SessionInit", session);
 
@@ -57,7 +60,7 @@ public class VotingHub : Hub
 
     public async Task Reset()
     {
-        foreach (var item in _sessionService.Sessions)
+        foreach (var item in _clientService.Sessions)
         {
             var session = item.Value;
 
@@ -67,28 +70,38 @@ public class VotingHub : Hub
                 session.Vote = null;
             }
 
-            _sessionService.Sessions[item.Key] = session;
+            _clientService.Sessions[item.Key] = session;
         }
 
-        await Clients.All.SendAsync("ClearVotes");
+        await Clients.All.SendAsync("Reset");
     }
 
     public async Task Vote(string vote)
     {
-        if (_sessionService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
+        if (_clientService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
         {
             session.Vote = vote;
             session.Voted = true;
-            _sessionService.Sessions[Context.ConnectionId] = session;
+            _clientService.Sessions[Context.ConnectionId] = session;
             await Clients.All.SendAsync("ReceiveVote", $"{session.Name} has voted!");
         }
+
+        foreach (var item in _clientService.Sessions)
+        {
+            if (!item.Value.Voted)
+            {
+                return;
+            }
+        }
+
+        await Clients.All.SendAsync("AllVotesReceived", $"All Votes in!");
     }
 
     public async Task GetVotes()
     {
         await Clients.All.SendAsync("ClearVotes");
 
-        foreach (var item in _sessionService.Sessions)
+        foreach (var item in _clientService.Sessions)
         {
             if (item.Value.Voted)
             {
@@ -99,9 +112,9 @@ public class VotingHub : Hub
 
     public async Task Leave()
     {
-        if (_sessionService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
+        if (_clientService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
         {
-            _sessionService.Sessions.TryRemove(Context.ConnectionId, out _);
+            _clientService.Sessions.TryRemove(Context.ConnectionId, out _);
             await Clients.All.SendAsync("ReceiveMessage", $"{session.Name} has left.");
             await Clients.All.SendAsync("LeaveClient", session.Name);
         }
