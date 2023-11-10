@@ -1,122 +1,114 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using StoryEstimate.Models;
-using StoryEstimate.Services;
+﻿// using Microsoft.AspNetCore.SignalR;
+// using StoryEstimate.Models;
 
-namespace StoryEstimate;
+// namespace StoryEstimate;
 
-public class VotingHub : Hub
-{
-    private readonly IConnectionManager<Client> _clientManager;
+// public class VotingHub : Hub
+// {
+//     private readonly IConnectionManager<Client> _clientManager;
 
-    public VotingHub(IConnectionManager<Client> clientManager)
-    {
-        _clientManager = clientManager;
-    }
+//     public VotingHub(IConnectionManager<Client> clientManager)
+//     {
+//         _clientManager = clientManager;
+//     }
 
-    public override async Task OnConnectedAsync()
-    {
-        await UpdateClient();
+    
 
-        _clientManager.AddConnection(Context.ConnectionId);
+//     private async Task UpdateClient()
+//     {
+//         foreach (var item in _clientService.Sessions)
+//         {
+//             await Clients.Caller.SendAsync("ReceiveClient", item.Value.Name);
+//         }
 
-        await base.OnConnectedAsync();
-    }
+//         foreach (var item in _clientService.Sessions)
+//         {
+//             if (item.Value.Voted)
+//             {
+//                 await Clients.Caller.SendAsync("ReceiveVote", $"{item.Value.Name} has voted!");
+//             }
+//         }
+//     }
 
-    private async Task UpdateClient()
-    {
-        foreach (var item in _clientService.Sessions)
-        {
-            await Clients.Caller.SendAsync("ReceiveClient", item.Value.Name);
-        }
+//     public async Task Send(string message)
+//     {
+//         if (_clientService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
+//         {
+//             await Clients.All.SendAsync("ReceiveMessage", $"{session.Name}: {message}");
+//         }   
+//     }
 
-        foreach (var item in _clientService.Sessions)
-        {
-            if (item.Value.Voted)
-            {
-                await Clients.Caller.SendAsync("ReceiveVote", $"{item.Value.Name} has voted!");
-            }
-        }
-    }
+//     public async Task Join(string name)
+//     {
+//         var session = new Session { Id = Context.ConnectionId, Name = name };
+//         _clientService.AddClientSession(session);
 
-    public async Task Send(string message)
-    {
-        if (_clientService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
-        {
-            await Clients.All.SendAsync("ReceiveMessage", $"{session.Name}: {message}");
-        }   
-    }
+//         await Clients.Caller.SendAsync("SessionInit", session);
 
-    public async Task Join(string name)
-    {
-        var session = new Session { Id = Context.ConnectionId, Name = name };
-        _clientService.AddClientSession(session);
+//         session.Name = name;
+//         await Clients.All.SendAsync("ReceiveMessage", $"{name} has joined.");
+//         await Clients.All.SendAsync("ReceiveClient", name);
+//     }
 
-        await Clients.Caller.SendAsync("SessionInit", session);
+//     public async Task Reset()
+//     {
+//         foreach (var item in _clientService.Sessions)
+//         {
+//             var session = item.Value;
 
-        session.Name = name;
-        await Clients.All.SendAsync("ReceiveMessage", $"{name} has joined.");
-        await Clients.All.SendAsync("ReceiveClient", name);
-    }
+//             if (session.Voted)
+//             {
+//                 session.Voted = false;
+//                 session.Vote = null;
+//             }
 
-    public async Task Reset()
-    {
-        foreach (var item in _clientService.Sessions)
-        {
-            var session = item.Value;
+//             _clientService.Sessions[item.Key] = session;
+//         }
 
-            if (session.Voted)
-            {
-                session.Voted = false;
-                session.Vote = null;
-            }
+//         await Clients.All.SendAsync("Reset");
+//     }
 
-            _clientService.Sessions[item.Key] = session;
-        }
+//     public async Task Vote(string vote)
+//     {
+//         if (_clientService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
+//         {
+//             session.Vote = vote;
+//             session.Voted = true;
+//             _clientService.Sessions[Context.ConnectionId] = session;
+//             await Clients.All.SendAsync("ReceiveVote", $"{session.Name} has voted!");
+//         }
 
-        await Clients.All.SendAsync("Reset");
-    }
+//         foreach (var item in _clientService.Sessions)
+//         {
+//             if (!item.Value.Voted)
+//             {
+//                 return;
+//             }
+//         }
 
-    public async Task Vote(string vote)
-    {
-        if (_clientService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
-        {
-            session.Vote = vote;
-            session.Voted = true;
-            _clientService.Sessions[Context.ConnectionId] = session;
-            await Clients.All.SendAsync("ReceiveVote", $"{session.Name} has voted!");
-        }
+//         await Clients.All.SendAsync("AllVotesReceived", $"All Votes in!");
+//     }
 
-        foreach (var item in _clientService.Sessions)
-        {
-            if (!item.Value.Voted)
-            {
-                return;
-            }
-        }
+//     public async Task GetVotes()
+//     {
+//         await Clients.All.SendAsync("ClearVotes");
 
-        await Clients.All.SendAsync("AllVotesReceived", $"All Votes in!");
-    }
+//         foreach (var item in _clientService.Sessions)
+//         {
+//             if (item.Value.Voted)
+//             {
+//                 await Clients.All.SendAsync("ReceiveVote", $"{item.Value.Name} voted: {item.Value.Vote}");
+//             }
+//         }
+//     }
 
-    public async Task GetVotes()
-    {
-        await Clients.All.SendAsync("ClearVotes");
-
-        foreach (var item in _clientService.Sessions)
-        {
-            if (item.Value.Voted)
-            {
-                await Clients.All.SendAsync("ReceiveVote", $"{item.Value.Name} voted: {item.Value.Vote}");
-            }
-        }
-    }
-
-    public async Task Leave()
-    {
-        if (_clientService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
-        {
-            _clientService.Sessions.TryRemove(Context.ConnectionId, out _);
-            await Clients.All.SendAsync("ReceiveMessage", $"{session.Name} has left.");
-            await Clients.All.SendAsync("LeaveClient", session.Name);
-        }
-    }
-}
+//     public async Task Leave()
+//     {
+//         if (_clientService.Sessions.TryGetValue(Context.ConnectionId, out Session session))
+//         {
+//             _clientService.Sessions.TryRemove(Context.ConnectionId, out _);
+//             await Clients.All.SendAsync("ReceiveMessage", $"{session.Name} has left.");
+//             await Clients.All.SendAsync("LeaveClient", session.Name);
+//         }
+//     }
+// }

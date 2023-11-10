@@ -1,0 +1,31 @@
+﻿@page "/create-session"
+@using StoryEstimate.Models
+@inject HttpClient HttpClient
+
+<form>
+    <div class="form-group">
+        <label for="sessionName">Session Name</label>
+        <input type="text" class="form-control" id="sessionName" @bind="_session.Name">
+    </div>
+    <button type="submit" class="btn btn-primary" @onclick="CreateSession">Create Session</button>
+</form>
+
+@code {
+
+    private Session _session = new();
+
+    private async Task CreateSession()
+    {
+        var response = await HttpClient.PostAsJsonAsync("create-session", _session);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // The session was created successfully.
+            // You can handle the response as needed, such as extracting the session ID or URL.
+        }
+        else
+        {
+            // Handle the case where the API request failed, e.g., show an error message.
+        }
+    }
+}

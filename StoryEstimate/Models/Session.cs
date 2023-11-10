@@ -1,8 +1,7 @@
-﻿using System.ComponentModel;
-
-namespace StoryEstimate.Models;
+﻿namespace StoryEstimate.Models;
 
 public struct Session
 {
-    
+    public string Id { get; set; }
+    public string Name { get; set; }
 }
