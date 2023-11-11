@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using StoryEstimate.Models;
 using StoryEstimate.Services.Abstract;
@@ -30,7 +31,7 @@ public class SessionHub : Hub
 
         // Success
         await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
-        await Clients.Caller.SendAsync("SessionUpdate", session);
+        await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
     }
 
     public async Task Vote(string vote, string sessionId)
@@ -47,7 +48,7 @@ public class SessionHub : Hub
             return;
         }
 
-        if (!session.Votes.TryAdd(client.Id, vote))
+        if (!session.Votes.TryAdd(client.Name, vote))
         {
             await Clients.Caller.SendAsync("ServerError", "Client not found.");
             return;
@@ -55,6 +56,14 @@ public class SessionHub : Hub
 
         // Success
         await Clients.Caller.SendAsync("VoteReceived");
+        var updatedClient = client;
+        updatedClient.HasVoted = true;
+
+        if (!session.Clients.TryUpdate(Context.ConnectionId, updatedClient, client))
+        {
+            await Clients.Caller.SendAsync("ServerError", "Client not updated.");
+            return;
+        }
 
         if (session.AllVotesReceived)
         {
@@ -95,6 +104,26 @@ public class SessionHub : Hub
 
         // Success
         session.Votes.Clear();
+        await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
+        await Clients.Group(sessionId).SendAsync("VotesReset");
+    }
+
+    public async Task ResetVote(string sessionId)
+    {
+        if (!_sessionService.GetSession(sessionId, out Session session))
+        {
+            await Clients.Caller.SendAsync("ServerError", "Session not found.");
+            return;
+        }
+
+        if (!session.Clients.TryGetValue(Context.ConnectionId, out Client client))
+        {
+            await Clients.Caller.SendAsync("ServerError", "Client not found.");
+            return;
+        }
+
+        // Success
+        client.HasVoted = false;
         await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
     }
 

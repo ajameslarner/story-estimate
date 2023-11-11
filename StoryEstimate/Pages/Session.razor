@@ -1,5 +1,6 @@
 ﻿@page "/session/join/{SessionId}"
 @using Microsoft.AspNetCore.SignalR.Client
+@using StoryEstimate.Models;
 @inject NavigationManager NavManager
 @implements IAsyncDisposable
 
@@ -75,13 +76,16 @@
             <h2>Results</h2>
             <hr />
             <label>
-                <button disabled="@(!_hasJoined)" @onclick="Reveal">Reveal</button> <button disabled="@(!_hasJoined)" @onclick="Reset">Reset</button>
+                <button disabled="@(!_hasJoined)" @onclick="Reveal">Reveal</button> <button disabled="@(!_hasJoined)" @onclick="ResetVotes">Reset</button>
             </label>
             <hr />
             <ul class="no-bullets">
-                @foreach (string vote in _votes)
+                @if (_revealVotes)
                 {
-                    <li>@vote</li>
+                    @foreach (var vote in _session.Votes)
+                    {
+                        <li>@vote.Value (@vote.Key)</li>
+                    }
                 }
             </ul>
         </div>
@@ -91,9 +95,17 @@
             <button @onclick="Leave" disabled="@(!_hasJoined)">Leave</button>
             <hr />
             <ul class="no-bullets">
-                @foreach (string client in _clients)
+                @foreach (Client client in _clients)
                 {
-                    <li>@client</li>
+                    @if(client.HasVoted)
+                    {
+                        <li>@client.Name (Voted)</li>
+                    }
+                    else
+                    {
+                        <li>@client.Name</li>
+                    }
+                    
                 }
             </ul>
         </div>
@@ -126,8 +138,8 @@
 
     // Collections
     private List<string> _messages => _session.Chat.ToList();
-    private List<string> _clients => _session.Clients.Values.Select(x => x.Name).ToList();
-    private List<string> _votes => _session.Votes.Values.Select(x => x).ToList();
+    private List<Client> _clients => _session.Clients.Values.ToList();
+    private List<string> _votes => _session.Votes.Values.ToList();
 
     // Inputs
     private string _message;
@@ -142,6 +154,7 @@
     private Models.Session _session = new();
     private bool _hasVoted;
     private bool _allVotesReceived;
+    private bool _revealVotes;
 
     protected override async Task OnInitializedAsync()
     {
@@ -177,7 +190,13 @@
 
         _connection.On("Reveal", () =>
         {
-            //_allVotesReceived = true;
+            _revealVotes = true;
+            InvokeAsync(StateHasChanged);
+        });
+
+        _connection.On("VotesReset", () =>
+        {
+            ResetVote();
             InvokeAsync(StateHasChanged);
         });
         
@@ -222,11 +241,18 @@
         await _connection.SendAsync("SendMessage", _message, _session.Id);
     }
 
-    public async Task Reset()
+    public async Task ResetVotes()
     {
         if (_connection is null) return;
 
         await _connection.SendAsync("ResetVotes", _session.Id);
+    }
+
+    public async Task ResetVote()
+    {
+        if (_connection is null) return;
+
+        await _connection.SendAsync("ResetVote", _session.Id);
     }
 
     public async Task Reveal()
