@@ -6,19 +6,28 @@ namespace StoryEstimate.Services;
 
 public class SessionService : ISessionService
 {
-    private readonly SessionManager _sessionManager;
+    private readonly SessionContext _sessionManager;
 
-    public SessionService(SessionManager sessionManager)
+    public SessionService(SessionContext sessionManager)
     {
         this._sessionManager = sessionManager;
     }
 
-    public bool CreateSession(string name)
+    public string? CreateSession(string name)
     {
         string sessionId = GenerateUniqueSessionId();
-        var session = new Session { Id = sessionId, Name = name };
+        var session = new Session
+        {
+            Id = sessionId,
+            Name = name
+        };
 
-        return _sessionManager.TryAdd(sessionId, session);
+        if (_sessionManager.TryAdd(sessionId, session))
+        {
+            return sessionId;
+        }
+
+        return default;
     }
 
     public bool GetSession(string sessionId, out Session session)
@@ -30,7 +39,7 @@ public class SessionService : ISessionService
     {
         // Generate a unique session ID
         // You can use Guid.NewGuid() or other methods to ensure uniqueness
-        return Guid.NewGuid().ToString();
+        return Guid.NewGuid().ToString()[..12].Replace("-", "");
     }
 }
 

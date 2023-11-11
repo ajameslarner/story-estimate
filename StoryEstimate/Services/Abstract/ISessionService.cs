@@ -4,6 +4,6 @@ namespace StoryEstimate.Services.Abstract;
 
 public interface ISessionService
 {
-    public bool CreateSession(string name);
+    public string CreateSession(string name);
     public bool GetSession(string sessionId, out Session session);
 }

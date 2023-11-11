@@ -4,7 +4,7 @@ using StoryEstimate.Services.Abstract;
 
 namespace StoryEstimate.Context;
 
-public class SessionManager : IDictionaryContext<string, Session>
+public class SessionContext : IDictionaryContext<string, Session>
 {
     private readonly ConcurrentDictionary<string, Session> _sessions = new();
 

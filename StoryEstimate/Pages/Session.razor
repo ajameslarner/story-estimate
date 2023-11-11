@@ -1,6 +1,6 @@
-﻿@page "/"
+﻿@page "/session/join/{SessionId}"
 @using Microsoft.AspNetCore.SignalR.Client
-@inject NavigationManager NavMan
+@inject NavigationManager NavManager
 @implements IAsyncDisposable
 
 <style>
@@ -104,7 +104,7 @@
     {
         <h4 style="color: red;">Client Unauthorised</h4>
     }
-    @if (_allVotesIn)
+    @if (_allVotesReceived)
     {
         <h4 style="color: green;">All votes are in!</h4>
     }
@@ -120,73 +120,64 @@
 </div> *@
 
 @code {
-    private List<string> _messages = new();
-    private List<string> _clients = new();
-    private List<string> _votes = new();
 
+    [Parameter]
+    public string? SessionId { get; set; }
+
+    // Collections
+    private List<string> _messages => _session.Chat.ToList();
+    private List<string> _clients => _session.Clients.Values.Select(x => x.Name).ToList();
+    private List<string> _votes => _session.Votes.Values.Select(x => x).ToList();
+
+    // Inputs
     private string _message;
     private HubConnection? _connection;
-    private Session _session;
     private string _name;
     private bool _hasJoined;
     private string _vote;
-    private bool _hasVoted;
+
+    // Fields
+    private string _errorMessage;
     private bool _unauthorised;
-    private bool _allVotesIn;
+    private Models.Session _session = new();
+    private bool _hasVoted;
+    private bool _allVotesReceived;
 
     protected override async Task OnInitializedAsync()
     {
-        _connection = new HubConnectionBuilder().WithUrl(NavMan.ToAbsoluteUri("/vote")).WithAutomaticReconnect().Build();
+        _connection = new HubConnectionBuilder()
+            .WithUrl(NavManager
+                .ToAbsoluteUri("/session"))
+                .WithAutomaticReconnect()
+                .Build();
 
-        _connection.On<Session>("SessionInit", (session) =>
+        _connection.On<string>("ServerError", (error) =>
+        {
+            _errorMessage = error;
+            InvokeAsync(StateHasChanged);
+        });
+
+        _connection.On<Models.Session>("SessionUpdate", (session) =>
         {
             _session = session;
             InvokeAsync(StateHasChanged);
         });
 
-        _connection.On<string>("ReceiveMessage", (message) =>
+        _connection.On("VoteReceived", () =>
         {
-            _messages.Add(message);
+            _hasVoted = true;
             InvokeAsync(StateHasChanged);
         });
 
-        _connection.On<string>("ReceiveVote", (vote) =>
+        _connection.On("AllVotesReceived", () =>
         {
-            _votes.Add(vote);
-            _allVotesIn = false;
+            _allVotesReceived = true;
             InvokeAsync(StateHasChanged);
         });
 
-        _connection.On<string>("AllVotesReceived", (vote) =>
+        _connection.On("Reveal", () =>
         {
-            _allVotesIn = true;
-            InvokeAsync(StateHasChanged);
-        });
-
-        _connection.On("ClearVotes", () =>
-        {
-            _votes.Clear();
-            InvokeAsync(StateHasChanged);
-        });
-
-        _connection.On("Reset", () =>
-        {
-            _votes.Clear();
-            _hasVoted = false;
-            _allVotesIn = false;
-            InvokeAsync(StateHasChanged);
-        });
-
-        _connection.On<string>("ReceiveClient", (name) =>
-        {
-            _clients.Add(name);
-            _allVotesIn = false;
-            InvokeAsync(StateHasChanged);
-        });
-
-        _connection.On<string>("LeaveClient", (name) =>
-        {
-            _clients.Remove(name);
+            //_allVotesReceived = true;
             InvokeAsync(StateHasChanged);
         });
         
@@ -204,29 +195,11 @@
         }
     }
 
-    public async Task Reset()
-    {
-        if (_connection is null) return;
-
-        await _connection.SendAsync("Reset");
-    }
-
-    public async Task Send()
-    {
-        if (string.IsNullOrWhiteSpace(_message)) return;
-
-        if (_connection is null) return;
-
-        await _connection.SendAsync("Send", _message);
-    }
-
     public async Task Join()
     {
-        if (string.IsNullOrWhiteSpace(_name)) return;
-
         if (_connection is null) return;
 
-        await _connection.SendAsync("Join", _name);
+        await _connection.SendAsync("JoinSession", _name, SessionId);
         _hasJoined = true;
     }
 
@@ -236,30 +209,46 @@
 
         if (_connection is null) return;
 
-        await _connection.SendAsync("Vote", _vote);
+        await _connection.SendAsync("Vote", _vote, _session.Id);
         _hasVoted = true;
+    }
+
+    public async Task Send()
+    {
+        if (string.IsNullOrWhiteSpace(_message)) return;
+
+        if (_connection is null) return;
+
+        await _connection.SendAsync("SendMessage", _message, _session.Id);
+    }
+
+    public async Task Reset()
+    {
+        if (_connection is null) return;
+
+        await _connection.SendAsync("ResetVotes", _session.Id);
     }
 
     public async Task Reveal()
     {
         if (_connection is null) return;
 
-        await _connection.SendAsync("GetVotes");
+        await _connection.SendAsync("RevealVotes", _session.Id);
     }
 
     public async Task Leave()
     {
         if (_connection is null) return;
 
-        await _connection.SendAsync("Leave");
+        await _connection.SendAsync("Leave", _session.Id);
         _hasJoined = false;
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (_connection is not null)
+        if (_connection is not null && _session is not null)
         {
-            await _connection.SendAsync("Leave");
+            await _connection.SendAsync("Leave", _session.Id);
             await _connection.DisposeAsync();
         }
     }

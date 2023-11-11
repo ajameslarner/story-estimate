@@ -1,6 +1,6 @@
 ﻿namespace StoryEstimate.Services.Abstract;
 
-internal interface IDictionaryContext<TKey, TValue> where TKey : notnull where TValue : struct
+internal interface IDictionaryContext<TKey, TValue> where TKey : notnull
 {
     bool TryAdd(TKey key, TValue value);
     bool TryRemove(TKey key, out TValue value);
