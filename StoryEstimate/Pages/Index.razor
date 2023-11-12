@@ -1,0 +1,11 @@
+﻿@page "/"
+@inject NavigationManager NavManager
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        NavManager.NavigateTo("/session/create");
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

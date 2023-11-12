@@ -20,7 +20,7 @@ public class SessionContext : IDictionaryContext<string, Session>
 
     public bool TryRemove(string key, out Session value)
     {
-        throw new NotImplementedException();
+        return _sessions.Remove(key, out value);
     }
 
     public IEnumerable<KeyValuePair<string, Session>> GetAll()

@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using StoryEstimate.Models;
 @inject NavigationManager NavManager
+@inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
 <style>
@@ -36,100 +37,127 @@
     }
 </style>
 
-<div class="container">
-    <div class="row">
-        <div style="text-align: center;" class="col-md-6">
-            <h2>Storypoint Estimator</h2>
-            <hr />
-            <div class="form-group">
-                @if (!_hasJoined)
-                {
-                    <label>
-                        <input id="input-field" placeholder="Your name" @bind="_name" />
-                        <button @onclick="Join">Join</button>
-                    </label>
-                }
-                else
-                {
-                    <label>
-                        <select id="input-field" @bind="_vote" disabled="@(_hasVoted)">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="5">5</option>
-                            <option value="8">8</option>
-                            <option value="13">13</option>
-                        </select>
-                        <button @onclick="Vote" disabled="@(_hasVoted)">Vote</button>
-                    </label>
-                }
+@if (_errorMessage is not null)
+{
+    <div class="container">
+        <div class="row">
+            <div style="text-align: center;">
+                <h3>
+                    <h4 style="color: red;">@_errorMessage</h4>
+                </h3>
             </div>
-            <hr />
-            <ul class="no-bullets">
-                @foreach (string message in _messages)
-                {
-                    <li>@message</li>
-                }
-            </ul>
         </div>
-        <div style="text-align: center;" class="col-md-2">
-            <h2>Results</h2>
-            <hr />
-            <label>
-                <button disabled="@(!_hasJoined)" @onclick="Reveal">Reveal</button> <button disabled="@(!_hasJoined)" @onclick="ResetVotes">Reset</button>
-            </label>
-            <hr />
-            <ul class="no-bullets">
-                @if (_revealVotes)
-                {
-                    @foreach (var vote in _session.Votes)
-                    {
-                        <li>@vote.Value (@vote.Key)</li>
-                    }
-                }
-            </ul>
+    </div>
+}
+else
+{
+    <div class="container">
+        <div class="row">
+            <div style="text-align: center;">
+                <h2>@_session.Name</h2>
+                <label>
+                    <input id="input-field" style="width: 500px; text-align: center;" placeholder="Session URL" @bind="_sessionUrl" readonly />
+                    <button @onclick="CopyToClipboard">Copy</button> @_copyMessage
+                </label>
+                <hr />
+            </div>
         </div>
-        <div style="text-align: center;" class="col-md-4">
-            <h2>Connected</h2>
-            <hr />
-            <button @onclick="Leave" disabled="@(!_hasJoined)">Leave</button>
-            <hr />
-            <ul class="no-bullets">
-                @foreach (Client client in _clients)
-                {
-                    @if(client.HasVoted)
+        <div class="row">
+            <div style="text-align: center;" class="col-md-6">
+                <h2>Storypoint Estimator</h2>
+                <hr />
+                <div class="form-group">
+                    @if (!_hasJoined)
                     {
-                        <li>@client.Name (Voted)</li>
+                        <label>
+                            <input id="input-field" placeholder="Your name" @bind="_name" />
+                            <button @onclick="Join">Join</button>
+                        </label>
                     }
                     else
                     {
-                        <li>@client.Name</li>
+                        <label>
+                            <select id="input-field" @bind="_vote" disabled="@(_hasVoted)">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                                <option value="8">8</option>
+                                <option value="13">13</option>
+                            </select>
+                            <button @onclick="Vote" disabled="@(_hasVoted)">Vote</button>
+                        </label>
                     }
-                    
-                }
-            </ul>
+                </div>
+                <hr />
+                <ul class="no-bullets">
+                    @foreach (string message in _messages)
+                    {
+                        <li>@message</li>
+                    }
+                </ul>
+            </div>
+            <div style="text-align: center;" class="col-md-2">
+                <h2>Results</h2>
+                <hr />
+                <label>
+                    <button disabled="@(!_hasJoined)" @onclick="Reveal">Reveal</button> <button disabled="@(!_hasJoined)" @onclick="ResetVotes">Reset</button>
+                </label>
+                <hr />
+                <ul class="no-bullets">
+                    @if (_revealVotes)
+                    {
+                        @foreach (var vote in _session.Votes)
+                        {
+                            <li>@vote.Value (@vote.Key)</li>
+                        }
+                    }
+                </ul>
+            </div>
+            <div style="text-align: center;" class="col-md-4">
+                <h2>Connected</h2>
+                <hr />
+                <button @onclick="Leave" disabled="@(!_hasJoined)">Leave</button>
+                <hr />
+                <ul class="no-bullets">
+                    @foreach (Client client in _clients)
+                    {
+                        @if(client.HasVoted)
+                        {
+                            <li>@client.Name (Voted)</li>
+                        }
+                        else
+                        {
+                            <li>@client.Name</li>
+                        }
+                        
+                    }
+                </ul>
+            </div>
         </div>
     </div>
-</div>
-<div style="text-align: center;">
-    @if (_unauthorised)
-    {
-        <h4 style="color: red;">Client Unauthorised</h4>
-    }
-    @if (_allVotesReceived)
-    {
-        <h4 style="color: green;">All votes are in!</h4>
-    }
-</div>
+    <div style="text-align: center;">
+        @if (_unauthorised)
+        {
+            <h4 style="color: red;">Client Unauthorised</h4>
+        }
+        @if (_allVotesReceived)
+        {
+            <h4 style="color: green;">All votes are in!</h4>
+        }
+    </div>
 
-@* <div class="sticky-bottom">
-    @if (_hasJoined)
-    {
-        <label>
-            <input id="input-field" @bind="_message" placeholder="Say something..." /> <button @onclick="Send">Send</button>
-        </label>
-    }
-</div> *@
+    @* <div class="sticky-bottom">
+        @if (_hasJoined)
+        {
+            <label>
+                <input id="input-field" @bind="_message" placeholder="Say something..." /> <button @onclick="Send">Send</button>
+            </label>
+        }
+    </div> *@
+}
+
+
 
 @code {
 
@@ -143,6 +171,8 @@
 
     // Inputs
     private string _message;
+    private string _copyMessage;
+    private string _sessionUrl;
     private HubConnection? _connection;
     private string _name;
     private bool _hasJoined;
@@ -176,6 +206,12 @@
             InvokeAsync(StateHasChanged);
         });
 
+        _connection.On<Models.Session>("SetSession", (session) =>
+        {
+            _session = session;
+            InvokeAsync(StateHasChanged);
+        });
+
         _connection.On("VoteReceived", () =>
         {
             _hasVoted = true;
@@ -197,12 +233,17 @@
         _connection.On("VotesReset", () =>
         {
             ResetVote();
+            _allVotesReceived = false;
+            _revealVotes = false;
+            _hasVoted = false;
             InvokeAsync(StateHasChanged);
         });
         
         try
         {
             await _connection.StartAsync();
+            _sessionUrl = NavManager.Uri;
+            
         }
         catch (HttpRequestException)
         {
@@ -212,6 +253,15 @@
         {
             Console.WriteLine(ex);
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_connection is null) return;
+
+        await _connection.SendAsync("GetSession", SessionId);
+        _sessionUrl = NavManager.Uri;
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     public async Task Join()
@@ -275,7 +325,14 @@
         if (_connection is not null && _session is not null)
         {
             await _connection.SendAsync("Leave", _session.Id);
+            await _connection.SendAsync("LeaveSession", _session.Id);
             await _connection.DisposeAsync();
         }
+    }
+
+    private async Task CopyToClipboard()
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", _sessionUrl);
+        _copyMessage = "Copied!";
     }
 }

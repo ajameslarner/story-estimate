@@ -35,6 +35,11 @@ public class SessionService : ISessionService
         return _sessionManager.TryGetValue(sessionId, out session);
     }
 
+    public bool RemoveSession(string sessionId)
+    {
+        return _sessionManager.TryRemove(sessionId, out _);
+    }
+
     private static string GenerateUniqueSessionId()
     {
         // Generate a unique session ID

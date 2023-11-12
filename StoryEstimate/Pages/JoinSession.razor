@@ -1,0 +1,25 @@
+﻿@page "/session/join"
+@using StoryEstimate.Models
+@using StoryEstimate.Services.Abstract
+@inject NavigationManager NavManager
+@inject ISessionService SessionManager
+
+<form>
+    <h2>Story Estimate Session</h2>
+    <br>
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Session ID" id="joinSession" @bind="_sessionId">
+    </div>
+    <hr />
+    <button type="submit" class="btn btn-primary" @onclick="JoinExistingSession">Join</button>
+</form>
+
+@code {
+
+    private string? _sessionId;
+
+    private async Task JoinExistingSession()
+    {
+        NavManager.NavigateTo($"/session/join/{_sessionId}", true);
+    }
+}

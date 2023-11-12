@@ -34,6 +34,18 @@ public class SessionHub : Hub
         await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
     }
 
+    public async Task GetSession(string sessionId)
+    {
+        if (!_sessionService.GetSession(sessionId, out Session session))
+        {
+            await Clients.Caller.SendAsync("ServerError", "Session not found.");
+            return;
+        }
+
+        // Success
+        await Clients.Caller.SendAsync("SetSession", session);
+    }
+
     public async Task Vote(string vote, string sessionId)
     {
         if (!_sessionService.GetSession(sessionId, out Session session))
@@ -123,7 +135,14 @@ public class SessionHub : Hub
         }
 
         // Success
-        client.HasVoted = false;
+        var updatedClient = client;
+        updatedClient.HasVoted = false;
+
+        if (!session.Clients.TryUpdate(Context.ConnectionId, updatedClient, client))
+        {
+            await Clients.Caller.SendAsync("ServerError", "Client not updated.");
+            return;
+        }
         await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
     }
 
@@ -150,5 +169,19 @@ public class SessionHub : Hub
         // Success
         session.Leave(Context.ConnectionId);
         await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
+    }
+
+    public async Task LeaveSession(string sessionId)
+    {
+        if (!_sessionService.GetSession(sessionId, out Session session))
+        {
+            await Clients.Caller.SendAsync("ServerError", "Session not found.");
+            return;
+        }
+
+        if (!session.Clients.Any())
+        {
+            _sessionService.RemoveSession(sessionId);
+        }
     }
 }
