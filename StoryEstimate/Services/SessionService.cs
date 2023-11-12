@@ -1,16 +1,50 @@
-﻿using System.Collections.Concurrent;
+﻿using StoryEstimate.Context;
+using StoryEstimate.Models;
+using StoryEstimate.Services.Abstract;
 
-namespace StoryEstimate;
+namespace StoryEstimate.Services;
 
-// Singleton
-public class SessionService
+public class SessionService : ISessionService
 {
-    public ConcurrentDictionary<string, Session> Sessions { get; private set;} = new();
+    private readonly SessionContext _sessionManager;
 
-    public void AddClientSession(Session session)
+    public SessionService(SessionContext sessionManager)
     {
-        if (session.Id is null) return;
+        this._sessionManager = sessionManager;
+    }
 
-        Sessions.TryAdd(session.Id, session);
+    public string? CreateSession(string name)
+    {
+        string sessionId = GenerateUniqueSessionId();
+        var session = new Session
+        {
+            Id = sessionId,
+            Name = name
+        };
+
+        if (_sessionManager.TryAdd(sessionId, session))
+        {
+            return sessionId;
+        }
+
+        return default;
+    }
+
+    public bool GetSession(string sessionId, out Session session)
+    {
+        return _sessionManager.TryGetValue(sessionId, out session);
+    }
+
+    public bool RemoveSession(string sessionId)
+    {
+        return _sessionManager.TryRemove(sessionId, out _);
+    }
+
+    private static string GenerateUniqueSessionId()
+    {
+        // Generate a unique session ID
+        // You can use Guid.NewGuid() or other methods to ensure uniqueness
+        return Guid.NewGuid().ToString()[..12].Replace("-", "");
     }
 }
+

@@ -1,0 +1,27 @@
+﻿@page "/session/create"
+@using StoryEstimate.Models
+@using StoryEstimate.Services.Abstract
+@inject NavigationManager NavManager
+@inject ISessionService SessionManager
+
+<form>
+    <h2>Story Estimate Session</h2>
+    <br>
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Session Name" id="createSession" @bind="_sessionName">
+    </div>
+    <hr />
+    <button type="submit" class="btn btn-primary" @onclick="CreateNewSession">Create Session</button>
+</form>
+
+@code {
+
+    private string? _sessionName;
+
+    private async Task CreateNewSession()
+    {
+        var sessionId = SessionManager.CreateSession(_sessionName);
+        
+        NavManager.NavigateTo($"/session/join/{sessionId}", true);
+    }
+}

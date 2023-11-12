@@ -1,4 +1,7 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using StoryEstimate.Context
+@inject SessionContext sessionService
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">StoryEstimate</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -10,16 +13,28 @@
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-plus" aria-hidden="true"></span> Storypoint Estimator
+            <NavLink class="nav-link" href="/session/create">
+                <span class="oi oi-plus" aria-hidden="true"></span> Create Session
             </NavLink>
         </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/session/join">
+                <span class="oi oi-account-login" aria-hidden="true"></span> Join Session
+            </NavLink>
+        </div>
+        @* @foreach (var session in sessionService.GetAll())
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="@($"/session/join/{session.Value.Id}")">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @session.Value.Name
+                </NavLink>
+            </div>
+        } *@
     </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
-
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()

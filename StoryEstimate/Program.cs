@@ -1,13 +1,17 @@
 
 using StoryEstimate;
 using Microsoft.AspNetCore.ResponseCompression;
+using StoryEstimate.Context;
+using StoryEstimate.Services;
+using StoryEstimate.Services.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<SessionService>();
+builder.Services.AddSingleton<SessionContext>();
+builder.Services.AddTransient<ISessionService, SessionService>();
 builder.Services.AddResponseCompression(options =>
 {
     options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat( new[] { "application/octet-stream" }); 
@@ -37,7 +41,7 @@ app.UseRouting();
 app.UseCors("AllowAll");
 
 app.MapBlazorHub();
-app.MapHub<VotingHub>("/vote");
+app.MapHub<SessionHub>("/session");
 app.MapFallbackToPage("/_Host");
 
 app.Run();
