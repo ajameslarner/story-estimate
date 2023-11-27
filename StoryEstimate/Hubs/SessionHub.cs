@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.SignalR;
 using StoryEstimate.Models;
 using StoryEstimate.Services.Abstract;
@@ -11,7 +12,7 @@ public class SessionHub : Hub
 
     public SessionHub(ISessionService sessionService)
     {
-        this._sessionService = sessionService;
+        _sessionService = sessionService;
     }
     
     public async Task JoinSession(string name, string sessionId)
@@ -30,6 +31,7 @@ public class SessionHub : Hub
 
         // Success
         await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
+        session.Chat.Enqueue($"[{DateTimeOffset.Now:HH:mm}] {name} has joined.");
         await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
     }
 
@@ -59,9 +61,14 @@ public class SessionHub : Hub
             return;
         }
 
-        if (!session.Votes.TryAdd(client.Name, vote))
+        try
         {
-            await Clients.Caller.SendAsync("ServerError", "Client not found.");
+            session.Votes[client.Name] = vote;
+            session.Chat.Enqueue($"[{DateTimeOffset.Now:HH:mm}] {client.Name} has voted!");
+        }
+        catch
+        {
+            await Clients.Caller.SendAsync("ServerError", "Internal error assigning vote.");
             return;
         }
 
@@ -142,18 +149,20 @@ public class SessionHub : Hub
             await Clients.Caller.SendAsync("ServerError", "Client not updated.");
             return;
         }
+        
         await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
     }
 
     public async Task RevealVotes(string sessionId)
     {
-        if (!_sessionService.GetSession(sessionId, out _))
+        if (!_sessionService.GetSession(sessionId, out Session session))
         {
             await Clients.Caller.SendAsync("ServerError", "Session not found.");
             return;
         }
 
         // Success
+        session.Chat.Enqueue($"[{DateTimeOffset.Now:HH:mm}] The results are in!");
         await Clients.Group(sessionId).SendAsync("Reveal");
     }
     
@@ -165,8 +174,15 @@ public class SessionHub : Hub
             return;
         }
 
+        if (!session.Clients.TryGetValue(Context.ConnectionId, out Client client))
+        {
+            await Clients.Caller.SendAsync("ServerError", "Client not found.");
+            return;
+        }
+
         // Success
         session.Leave(Context.ConnectionId);
+        session.Chat.Enqueue($"[{DateTimeOffset.Now:HH:mm}] {client.Name} has left!");
         await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
     }
 

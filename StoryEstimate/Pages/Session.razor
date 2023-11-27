@@ -77,7 +77,7 @@ else
                     else
                     {
                         <label>
-                            <select id="input-field" @bind="_vote" disabled="@(_hasVoted)">
+                            <select id="input-field" @bind="_vote">
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -85,17 +85,17 @@ else
                                 <option value="8">8</option>
                                 <option value="13">13</option>
                             </select>
-                            <button @onclick="Vote" disabled="@(_hasVoted)">Vote</button>
+                            <button @onclick="Vote">Vote</button>
                         </label>
                     }
                 </div>
                 <hr />
-                <ul class="no-bullets">
+@*                 <ul class="no-bullets">
                     @foreach (string message in _messages)
                     {
                         <li>@message</li>
                     }
-                </ul>
+                </ul> *@
             </div>
             <div style="text-align: center;" class="col-md-2">
                 <h2>Results</h2>
@@ -130,13 +130,19 @@ else
                         {
                             <li>@client.Name</li>
                         }
-                        
                     }
                 </ul>
             </div>
         </div>
     </div>
-    <div style="text-align: center;">
+    <div class="row">
+        <hr />
+        <ul class="no-bullets">
+            @foreach (string message in _messages)
+            {
+                <li>@message</li>
+            }
+        </ul>
         @if (_unauthorised)
         {
             <h4 style="color: red;">Client Unauthorised</h4>

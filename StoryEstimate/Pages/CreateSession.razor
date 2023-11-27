@@ -11,16 +11,27 @@
         <input type="text" class="form-control" placeholder="Session Name" id="createSession" @bind="_sessionName">
     </div>
     <hr />
+    <div class="form-group">
+        <input type="checkbox" class="form-check-input" id="isPrivate" @bind="_isPrivate">
+        <label class="form-check-label" for="isPrivate">Private</label>
+    </div>
+    <br />
     <button type="submit" class="btn btn-primary" @onclick="CreateNewSession">Create Session</button>
 </form>
 
 @code {
 
     private string? _sessionName;
+    private bool _isPrivate;
 
     private async Task CreateNewSession()
     {
-        var sessionId = SessionManager.CreateSession(_sessionName);
+        if (string.IsNullOrEmpty(_sessionName))
+        {
+            return;
+        }
+
+        var sessionId = SessionManager.CreateSession(_sessionName, _isPrivate);
         
         NavManager.NavigateTo($"/session/join/{sessionId}", true);
     }
