@@ -5,38 +5,6 @@
 @inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
-<style>
-    #input-field {
-        width: 200px;
-        height: 30px;
-        background-color: #f8f9fa;
-        border-width: 0.5;
-        padding-left: 5px;
-        font-size: 16px;
-    }
-
-    #input-field:focus {
-        outline: none;
-    }
-    
-    .no-bullets {
-        list-style-type: none;
-        padding-left: 0;
-    }
-
-    #centered-container {
-        text-align: center;
-    }
-
-    .sticky-bottom {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        padding: 20px;
-        text-align: left;
-    }
-</style>
-
 @if (_errorMessage is not null)
 {
     <div class="container">
@@ -54,30 +22,29 @@ else
     <div class="container">
         <div class="row">
             <div style="text-align: center;">
-                <h2>@_session.Name</h2>
-                <label>
-                    <input id="input-field" style="width: 500px; text-align: center;" placeholder="Session URL" @bind="_sessionUrl" readonly />
-                    <button @onclick="CopyToClipboard">Copy</button> @_copyMessage
-                </label>
-                <hr />
+                <h1 style="font-family: 'MaryAnn-ExtraBold', sans-serif;">@_session.Name</h1>
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <input type="text" style="text-align: center;font-family: 'MaryAnn-Light', sans-serif;" class="form-control" placeholder="Session URL" @bind="_sessionUrl" readonly />
+                    <button style="margin:10px;" class="btn btn-primary" @onclick="CopyToClipboard">Copy</button> @_copyMessage
+                </div>
             </div>
         </div>
+
         <div class="row">
             <div style="text-align: center;" class="col-md-6">
-                <h2>Storypoint Estimator</h2>
                 <hr />
                 <div class="form-group">
                     @if (!_hasJoined)
                     {
-                        <label>
-                            <input id="input-field" placeholder="Your name" @bind="_name" />
-                            <button @onclick="Join">Join</button>
-                        </label>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <input type="text" class="form-control" placeholder="Your name" @bind="_name" />
+                            <button style="margin:10px;" class="btn btn-primary" @onclick="Join">Join</button>
+                        </div>
                     }
                     else
                     {
-                        <label>
-                            <select id="input-field" @bind="_vote" disabled="@(_hasVoted)">
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <select class="form-control" @bind="_vote">
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -85,24 +52,17 @@ else
                                 <option value="8">8</option>
                                 <option value="13">13</option>
                             </select>
-                            <button @onclick="Vote" disabled="@(_hasVoted)">Vote</button>
-                        </label>
+                            <button style="margin:10px;" class="btn btn-primary" @onclick="Vote">Vote</button>
+                        </div>
                     }
                 </div>
                 <hr />
-                <ul class="no-bullets">
-                    @foreach (string message in _messages)
-                    {
-                        <li>@message</li>
-                    }
-                </ul>
             </div>
             <div style="text-align: center;" class="col-md-2">
-                <h2>Results</h2>
                 <hr />
-                <label>
-                    <button disabled="@(!_hasJoined)" @onclick="Reveal">Reveal</button> <button disabled="@(!_hasJoined)" @onclick="ResetVotes">Reset</button>
-                </label>
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <button style="margin:10px;" class="btn btn-primary" disabled="@(!_hasJoined || !_votes.Any())" @onclick="Reveal">Reveal</button> <button class="btn btn-primary" disabled="@(!_hasJoined || !_votes.Any())" @onclick="ResetVotes">Reset</button>
+                </div>
                 <hr />
                 <ul class="no-bullets">
                     @if (_revealVotes)
@@ -115,9 +75,10 @@ else
                 </ul>
             </div>
             <div style="text-align: center;" class="col-md-4">
-                <h2>Connected</h2>
                 <hr />
-                <button @onclick="Leave" disabled="@(!_hasJoined)">Leave</button>
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <button style="margin:10px;" class="btn btn-primary" @onclick="Leave" disabled="@(!_hasJoined)">Leave</button>
+                </div> 
                 <hr />
                 <ul class="no-bullets">
                     @foreach (Client client in _clients)
@@ -136,28 +97,55 @@ else
             </div>
         </div>
     </div>
-    <div style="text-align: center;">
-        @if (_unauthorised)
-        {
-            <h4 style="color: red;">Client Unauthorised</h4>
-        }
-        @if (_allVotesReceived)
-        {
-            <h4 style="color: green;">All votes are in!</h4>
-        }
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6" style="height: 300px; overflow-y: auto; display: flex; flex-direction: column;">
+                <ul class="no-bullets  hide-scrollbar" style="flex-grow: 1; overflow-y: auto;">
+                    @foreach (string message in _messages)
+                    {
+                        <li>@message</li>
+                    }
+                    <div @ref="_bottom"></div>
+                </ul>
+                <div>
+                    @if (_hasJoined)
+                    {
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <input type="text" class="form-control" @onkeyup="CheckForEnter" @bind="_message" placeholder="Say something..." /> <button style="margin:10px;" class="btn btn-primary" @ref="_button" @onclick="Send">Send</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div style="text-align: center;" class="col-md-2">
+                @if (_revealVotes)
+                {
+                    <h4 style="color: green;">Ta-da!</h4>
+                }
+            </div>
+            <div style="text-align: center;" class="col-md-4">
+                @if (_allVotesReceived)
+                {
+                    <h4 style="color: green;">All votes are in!</h4>
+                }
+            </div>
+        </div>
     </div>
 
-    @* <div class="sticky-bottom">
-        @if (_hasJoined)
-        {
-            <label>
-                <input id="input-field" @bind="_message" placeholder="Say something..." /> <button @onclick="Send">Send</button>
-            </label>
-        }
-    </div> *@
+    @if (_unauthorised)
+    {
+        <h4 style="color: red;">Client Unauthorised</h4>
+    }
 }
 
-
+<script>
+    function scrollToBottom(element) {
+        element.scrollIntoView({ behavior: "smooth" });
+    }
+    function focusElement(element) {
+        element.focus();
+    }
+</script>
 
 @code {
 
@@ -204,6 +192,7 @@ else
         {
             _session = session;
             InvokeAsync(StateHasChanged);
+            InvokeAsync(ScrollToBottom);
         });
 
         _connection.On<Models.Session>("SetSession", (session) =>
@@ -238,12 +227,12 @@ else
             _hasVoted = false;
             InvokeAsync(StateHasChanged);
         });
-        
+
         try
         {
             await _connection.StartAsync();
             _sessionUrl = NavManager.Uri;
-            
+
         }
         catch (HttpRequestException)
         {
@@ -268,6 +257,8 @@ else
     {
         if (_connection is null) return;
 
+        if (string.IsNullOrWhiteSpace(_name)) return;
+
         await _connection.SendAsync("JoinSession", _name, SessionId);
         _hasJoined = true;
     }
@@ -289,6 +280,7 @@ else
         if (_connection is null) return;
 
         await _connection.SendAsync("SendMessage", _message, _session.Id);
+        _message = string.Empty;
     }
 
     public async Task ResetVotes()
@@ -334,5 +326,23 @@ else
     {
         await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", _sessionUrl);
         _copyMessage = "Copied!";
+    }
+
+    private ElementReference _bottom;
+
+    private async Task ScrollToBottom()
+    {
+        await Task.Delay(50);
+        await JSRuntime.InvokeVoidAsync("scrollToBottom", _bottom);
+    }
+
+    private ElementReference _button;
+
+    private async Task CheckForEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Send();
+        }
     }
 }

@@ -1,9 +1,9 @@
 ﻿@using StoryEstimate.Context
-@inject SessionContext sessionService
+@inject SessionContext sessions
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">StoryEstimate</a>
+        <a style="font-family: 'MaryAnn-ExtraBold', sans-serif; color:rgb(60,60,60)" class="navbar-brand" href="">Story Estimate</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -13,23 +13,26 @@
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/session/create">
+            <NavLink style="font-family: 'MaryAnn-Bold', sans-serif;" class="nav-link" href="/session/create" Match="NavLinkMatch.All">
                 <span class="oi oi-plus" aria-hidden="true"></span> Create Session
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/session/join">
+            <NavLink style="font-family: 'MaryAnn-Bold', sans-serif;" class="nav-link" href="/session/join" Match="NavLinkMatch.All">
                 <span class="oi oi-account-login" aria-hidden="true"></span> Join Session
             </NavLink>
         </div>
-        @* @foreach (var session in sessionService.GetAll())
+        @foreach (var session in sessions.GetAll())
         {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="@($"/session/join/{session.Value.Id}")">
-                    <span class="oi oi-plus" aria-hidden="true"></span> @session.Value.Name
-                </NavLink>
-            </div>
-        } *@
+            if (!session.Value.Private)
+            {
+                <div class="nav-item px-3">
+                    <NavLink style="font-family: 'MaryAnn-Bold', sans-serif;" class="nav-link" href="@($"/session/join/{session.Value.Id}")" Match="NavLinkMatch.All">
+                        <span class="oi oi-chevron-right" aria-hidden="true"></span> @session.Value.Name
+                    </NavLink>
+                </div>
+            }
+        }
     </nav>
 </div>
 
@@ -40,5 +43,21 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    protected override void OnInitialized()
+    {
+        sessions.OnChanged += () =>
+        {
+            InvokeAsync(StateHasChanged);
+        };
+    }
+
+    public void Dispose()
+    {
+        sessions.OnChanged -= () =>
+        {
+            InvokeAsync(StateHasChanged);
+        };
     }
 }

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.ResponseCompression;
 using StoryEstimate.Context;
 using StoryEstimate.Services;
 using StoryEstimate.Services.Abstract;
+using Microsoft.Extensions.Configuration;
+using StoryEstimate.Models.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<SessionContext>();
 builder.Services.AddTransient<ISessionService, SessionService>();
+builder.Services.Configure<SessionConfiguration>(builder.Configuration.GetSection("Session"));
 builder.Services.AddResponseCompression(options =>
 {
     options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat( new[] { "application/octet-stream" }); 

@@ -1,26 +1,35 @@
-﻿using StoryEstimate.Context;
-using StoryEstimate.Models;
+﻿using Microsoft.Extensions.Options;
+using StoryEstimate.Context;
+using StoryEstimate.Models.Configurations;
 using StoryEstimate.Services.Abstract;
+using Session = StoryEstimate.Models.Session;
+using Timer = System.Timers.Timer;
 
 namespace StoryEstimate.Services;
 
 public class SessionService : ISessionService
 {
+    private readonly SessionConfiguration _options;
     private readonly SessionContext _sessionManager;
 
-    public SessionService(SessionContext sessionManager)
+    public SessionService(SessionContext sessionManager, IOptions<SessionConfiguration> options)
     {
-        this._sessionManager = sessionManager;
+        _options = options.Value;
+        _sessionManager = sessionManager;
     }
 
-    public string? CreateSession(string name)
+    public string? CreateSession(string name, bool isPrivate)
     {
         string sessionId = GenerateUniqueSessionId();
         var session = new Session
         {
             Id = sessionId,
-            Name = name
+            Name = name,
+            Private = isPrivate
         };
+
+        session.Initialize(_options);
+        session.OnTimeout += SessionOnTimeout;
 
         if (_sessionManager.TryAdd(sessionId, session))
         {
@@ -30,21 +39,12 @@ public class SessionService : ISessionService
         return default;
     }
 
-    public bool GetSession(string sessionId, out Session session)
-    {
-        return _sessionManager.TryGetValue(sessionId, out session);
-    }
+    private void SessionOnTimeout(object? sender, Events.SessionTimeoutEventArgs e)
+        => _sessionManager.TryRemove(e.SessionId, out _);
 
-    public bool RemoveSession(string sessionId)
-    {
-        return _sessionManager.TryRemove(sessionId, out _);
-    }
+    public bool GetSession(string sessionId, out Session session)
+        => _sessionManager.TryGetValue(sessionId, out session);
 
     private static string GenerateUniqueSessionId()
-    {
-        // Generate a unique session ID
-        // You can use Guid.NewGuid() or other methods to ensure uniqueness
-        return Guid.NewGuid().ToString()[..12].Replace("-", "");
-    }
+        => Guid.NewGuid().ToString()[..12].Replace("-", "");
 }
-

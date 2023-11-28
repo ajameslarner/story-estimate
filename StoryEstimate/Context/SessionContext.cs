@@ -8,9 +8,18 @@ public class SessionContext : IDictionaryContext<string, Session>
 {
     private readonly ConcurrentDictionary<string, Session> _sessions = new();
 
+    public event Action OnChanged;
+
     public bool TryAdd(string key, Session value)
     {
-        return _sessions.TryAdd(key, value);
+        if (!_sessions.TryAdd(key, value))
+        {
+            return false;
+        }
+
+        OnChanged?.Invoke();
+        
+        return true;
     }
 
     public bool TryGetValue(string key, out Session value)

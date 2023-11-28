@@ -5,22 +5,31 @@
 @inject ISessionService SessionManager
 
 <form>
-    <h2>Create a new session</h2>
+    <h2 style="font-family: 'MaryAnn-Bold', sans-serif;">Create a new session</h2>
     <br>
     <div class="form-group">
         <input type="text" class="form-control" placeholder="Session Name" id="createSession" @bind="_sessionName">
+        <hr />
+        <input type="checkbox" class="form-check-input" id="isPrivate" @bind="_isPrivate">
+        <label class="form-check-label" for="isPrivate">Private Session</label>
     </div>
-    <hr />
+    <br />
     <button type="submit" class="btn btn-primary" @onclick="CreateNewSession">Create Session</button>
 </form>
 
 @code {
 
     private string? _sessionName;
+    private bool _isPrivate;
 
     private async Task CreateNewSession()
     {
-        var sessionId = SessionManager.CreateSession(_sessionName);
+        if (string.IsNullOrEmpty(_sessionName))
+        {
+            return;
+        }
+
+        var sessionId = SessionManager.CreateSession(_sessionName, _isPrivate);
         
         NavManager.NavigateTo($"/session/join/{sessionId}", true);
     }

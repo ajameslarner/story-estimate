@@ -13,3 +13,14 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+/.vs/ProjectEvaluation/storyestimate.metadata.v7.bin
+/.vs/ProjectEvaluation/storyestimate.projects.v7.bin
+/.vs/StoryEstimate/DesignTimeBuild/.dtbcache.v2
+/.vs/StoryEstimate/FileContentIndex/721227d5-1861-4c7f-931b-bb6ba949c81b.vsidx
+/.vs/StoryEstimate/FileContentIndex/8d9b4583-6a2f-4528-a8e8-a4a6470aebb6.vsidx
+/.vs/StoryEstimate/FileContentIndex/96872865-bbb5-46ad-aebb-ebf53eeb5d37.vsidx
+/.vs/StoryEstimate/v17/.futdcache.v2
+/.vs/StoryEstimate/v17/.suo
+/StoryEstimate/Events/SessionTimeoutEventArgs.cs
+/StoryEstimate/Models/Configurations/SessionConfiguration.cs
+/StoryEstimate/StoryEstimate.csproj.user
