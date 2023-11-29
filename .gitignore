@@ -13,6 +13,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+.vs/
 /.vs/ProjectEvaluation/storyestimate.metadata.v7.bin
 /.vs/ProjectEvaluation/storyestimate.projects.v7.bin
 /.vs/StoryEstimate/DesignTimeBuild/.dtbcache.v2
@@ -24,3 +25,6 @@ bld/
 /StoryEstimate/Events/SessionTimeoutEventArgs.cs
 /StoryEstimate/Models/Configurations/SessionConfiguration.cs
 /StoryEstimate/StoryEstimate.csproj.user
+/.vs/StoryEstimate/FileContentIndex/93e7f31a-015a-4444-9256-5b8516283f32.vsidx
+/.vs/StoryEstimate/FileContentIndex/a6beaa9b-25ae-484a-8938-ed4b46b9202a.vsidx
+/.vs/StoryEstimate/FileContentIndex/a6beaa9b-25ae-484a-8938-ed4b46b9202a.vsidx
