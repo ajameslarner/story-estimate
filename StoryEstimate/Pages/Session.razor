@@ -10,9 +10,7 @@
     <div class="container">
         <div class="row">
             <div style="text-align: center;">
-                <h3>
-                    <h4 style="color: red;">@_errorMessage</h4>
-                </h3>
+                <h4 style="color: red;">@_errorMessage</h4>
             </div>
         </div>
     </div>
@@ -91,7 +89,6 @@ else
                         {
                             <li>@client.Name</li>
                         }
-                        
                     }
                 </ul>
             </div>
@@ -120,13 +117,13 @@ else
             <div style="text-align: center;" class="col-md-2">
                 @if (_revealVotes)
                 {
-                    <h4 style="color: green;">Ta-da!</h4>
+                    <h4 style="color: rgb(236, 138, 0);">Ta-da!</h4>
                 }
             </div>
             <div style="text-align: center;" class="col-md-4">
                 @if (_allVotesReceived)
                 {
-                    <h4 style="color: green;">All votes are in!</h4>
+                    <h4 style="color: rgb(236, 138, 0);">All votes are in!</h4>
                 }
             </div>
         </div>
@@ -250,6 +247,7 @@ else
 
         await _connection.SendAsync("GetSession", SessionId);
         _sessionUrl = NavManager.Uri;
+
         await base.OnAfterRenderAsync(firstRender);
     }
 

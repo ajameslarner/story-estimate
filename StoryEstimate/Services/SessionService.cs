@@ -28,7 +28,7 @@ public class SessionService : ISessionService
             Private = isPrivate
         };
 
-        session.Initialize(_options);
+        session.InitializeTimeout();
         session.OnTimeout += SessionOnTimeout;
 
         if (_sessionManager.TryAdd(sessionId, session))

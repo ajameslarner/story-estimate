@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using StoryEstimate.Models;
 using StoryEstimate.Services.Abstract;
 using Session = StoryEstimate.Models.Session;

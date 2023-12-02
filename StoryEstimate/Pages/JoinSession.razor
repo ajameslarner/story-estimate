@@ -8,7 +8,7 @@
     <h2 style ="font-family: 'MaryAnn-Bold', sans-serif;">Join an existing session</h2>
     <br>
     <div class="form-group">
-        <input type="text" class="form-control" placeholder="Session ID" id="joinSession" @bind="_sessionId">
+        <input type="text" class="form-control" placeholder="Session URL" id="joinSession" @bind="_sessionId">
     </div>
     <hr />
     <button type="submit" class="btn btn-primary" @onclick="JoinExistingSession">Join</button>
@@ -20,6 +20,6 @@
 
     private async Task JoinExistingSession()
     {
-        NavManager.NavigateTo($"/session/join/{_sessionId}", true);
+        NavManager.NavigateTo(_sessionId, true);
     }
 }
