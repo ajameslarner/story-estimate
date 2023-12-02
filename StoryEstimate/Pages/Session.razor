@@ -20,7 +20,14 @@ else
     <div class="container">
         <div class="row">
             <div style="text-align: center;">
-                <h1 style="font-family: 'MaryAnn-ExtraBold', sans-serif;">@_session.Name</h1>
+                @if (_session.Private)
+                {
+                    <h1 style="font-family: 'MaryAnn-ExtraBold', sans-serif;">@_session.Name (Private)</h1>
+                }
+                else
+                {
+                    <h1 style="font-family: 'MaryAnn-ExtraBold', sans-serif;">@_session.Name</h1>
+                }
                 <div style="display: flex; justify-content: center; align-items: center;">
                     <input type="text" style="text-align: center;font-family: 'MaryAnn-Light', sans-serif;" class="form-control" placeholder="Session URL" @bind="_sessionUrl" readonly />
                     <button style="margin:10px;" class="btn btn-primary" @onclick="CopyToClipboard">Copy</button> @_copyMessage
@@ -145,9 +152,28 @@ else
 </script>
 
 @code {
+    private string? _sessionId;
 
     [Parameter]
-    public string? SessionId { get; set; }
+    public string? SessionId
+    {
+        get => _sessionId;
+        set
+        {
+            if (value != _sessionId && _hasJoined)
+            {
+                Leave();
+
+                if (_connection is not null)
+                {
+                    _connection.SendAsync("GetSession", SessionId);
+                    _sessionUrl = NavManager.Uri;
+                }
+            }
+
+            _sessionId = value;
+        }
+    }
 
     // Collections
     private List<string> _messages => _session.Chat.ToList();
@@ -214,6 +240,7 @@ else
         {
             _revealVotes = true;
             InvokeAsync(StateHasChanged);
+            InvokeAsync(ScrollToBottom);
         });
 
         _connection.On("VotesReset", () =>
@@ -259,6 +286,7 @@ else
 
         await _connection.SendAsync("JoinSession", _name, SessionId);
         _hasJoined = true;
+        _name = "";
     }
 
     public async Task Vote()
@@ -308,13 +336,17 @@ else
 
         await _connection.SendAsync("Leave", _session.Id);
         _hasJoined = false;
+        _vote = string.Empty;
+        _hasVoted = false;
+        _allVotesReceived = false;
+        _revealVotes = false;
     }
 
     public async ValueTask DisposeAsync()
     {
         if (_connection is not null && _session is not null)
         {
-            await _connection.SendAsync("Leave", _session.Id);
+            await Leave();
             await _connection.SendAsync("LeaveSession", _session.Id);
             await _connection.DisposeAsync();
         }
