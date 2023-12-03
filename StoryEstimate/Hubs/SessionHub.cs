@@ -18,7 +18,7 @@ public class SessionHub : Hub
     {
         if (!_sessionService.GetSession(sessionId, out Session session))
         {
-            await Clients.Caller.SendAsync("ServerError", "Session not found.");
+            await Clients.Caller.SendAsync("ServerError", "Failed to retrieve session.");
             return;
         }
 
@@ -186,14 +186,5 @@ public class SessionHub : Hub
         session.Leave(Context.ConnectionId);
         session.Chat.Enqueue($"[{DateTimeOffset.Now:HH:mm}] {client.Name} has left.");
         await Clients.Group(sessionId).SendAsync("SessionUpdate", session);
-    }
-
-    public async Task LeaveSession(string sessionId)
-    {
-        if (!_sessionService.GetSession(sessionId, out Session session))
-        {
-            await Clients.Caller.SendAsync("ServerError", "Session not found.");
-            return;
-        }
     }
 }

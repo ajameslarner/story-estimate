@@ -152,28 +152,9 @@ else
 </script>
 
 @code {
-    private string? _sessionId;
 
     [Parameter]
-    public string? SessionId
-    {
-        get => _sessionId;
-        set
-        {
-            if (value != _sessionId && _hasJoined)
-            {
-                Leave();
-
-                if (_connection is not null)
-                {
-                    _connection.SendAsync("GetSession", SessionId);
-                    _sessionUrl = NavManager.Uri;
-                }
-            }
-
-            _sessionId = value;
-        }
-    }
+    public string? SessionId { get; set; }
 
     // Collections
     private List<string> _messages => _session.Chat.ToList();
@@ -284,6 +265,11 @@ else
 
         if (string.IsNullOrWhiteSpace(_name)) return;
 
+        if (_hasJoined)
+        {
+            await Leave();
+        }
+
         await _connection.SendAsync("JoinSession", _name, SessionId);
         _hasJoined = true;
         _name = "";
@@ -344,10 +330,9 @@ else
 
     public async ValueTask DisposeAsync()
     {
-        if (_connection is not null && _session is not null)
+        if (_connection is not null && _session is not null && _hasJoined)
         {
             await Leave();
-            await _connection.SendAsync("LeaveSession", _session.Id);
             await _connection.DisposeAsync();
         }
     }
