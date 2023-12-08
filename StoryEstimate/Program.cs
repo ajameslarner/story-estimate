@@ -1,11 +1,10 @@
-
-using StoryEstimate;
 using Microsoft.AspNetCore.ResponseCompression;
 using StoryEstimate.Context;
 using StoryEstimate.Services;
 using StoryEstimate.Services.Abstract;
 using Microsoft.Extensions.Configuration;
 using StoryEstimate.Models.Configurations;
+using StoryEstimate.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 

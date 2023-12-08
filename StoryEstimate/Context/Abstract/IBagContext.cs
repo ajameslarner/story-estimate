@@ -1,4 +1,4 @@
-﻿namespace StoryEstimate;
+﻿namespace StoryEstimate.Context.Abstract;
 
 internal interface IBagContext<T> where T : struct
 {

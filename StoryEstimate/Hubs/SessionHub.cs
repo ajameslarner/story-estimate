@@ -3,7 +3,7 @@ using StoryEstimate.Models;
 using StoryEstimate.Services.Abstract;
 using Session = StoryEstimate.Models.Session;
 
-namespace StoryEstimate;
+namespace StoryEstimate.Hubs;
 
 public class SessionHub : Hub
 {
@@ -13,7 +13,7 @@ public class SessionHub : Hub
     {
         _sessionService = sessionService;
     }
-    
+
     public async Task JoinSession(string name, string sessionId)
     {
         if (!_sessionService.GetSession(sessionId, out Session session))
@@ -97,7 +97,7 @@ public class SessionHub : Hub
 
     public async Task SendMessage(string message, string sessionId)
     {
-        if (!_sessionService.GetSession(sessionId, out Models.Session session))
+        if (!_sessionService.GetSession(sessionId, out Session session))
         {
             await Clients.Caller.SendAsync("ServerError", "Session not found.");
             return;
@@ -116,7 +116,7 @@ public class SessionHub : Hub
 
     public async Task ResetVotes(string sessionId)
     {
-        if (!_sessionService.GetSession(sessionId, out Models.Session session))
+        if (!_sessionService.GetSession(sessionId, out Session session))
         {
             await Clients.Caller.SendAsync("ServerError", "Session not found.");
             return;
@@ -167,7 +167,7 @@ public class SessionHub : Hub
         await Clients.Group(sessionId).SendAsync("Reveal");
         session.Chat.Enqueue($"[{DateTimeOffset.Now:HH:mm}] The results are in!");
     }
-    
+
     public async Task Leave(string sessionId)
     {
         if (!_sessionService.GetSession(sessionId, out Session session))
