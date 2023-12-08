@@ -3,7 +3,7 @@ using StoryEstimate.Models;
 using StoryEstimate.Services.Abstract;
 using Session = StoryEstimate.Models.Session;
 
-namespace StoryEstimate.Hubs;
+namespace StoryEstimate.Domain.Hubs;
 
 public class SessionHub : Hub
 {

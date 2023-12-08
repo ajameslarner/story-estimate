@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
-using StoryEstimate.Context.Abstract;
+using StoryEstimate.Common.Context.Abstract;
 using StoryEstimate.Models;
 
-namespace StoryEstimate.Context;
+namespace StoryEstimate.Common.Context;
 
 public class SessionContext : IDictionaryContext<string, Session>
 {
@@ -19,7 +19,7 @@ public class SessionContext : IDictionaryContext<string, Session>
         }
 
         OnChanged?.Invoke();
-        
+
         return true;
     }
 

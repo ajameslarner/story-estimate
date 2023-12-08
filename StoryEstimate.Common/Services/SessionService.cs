@@ -1,11 +1,7 @@
-﻿using Microsoft.Extensions.Options;
-using StoryEstimate.Context;
-using StoryEstimate.Models.Configurations;
-using StoryEstimate.Services.Abstract;
+﻿using StoryEstimate.Domain.Services.Abstract;
 using Session = StoryEstimate.Models.Session;
-using Timer = System.Timers.Timer;
 
-namespace StoryEstimate.Services;
+namespace StoryEstimate.Common.Services;
 
 public class SessionService : ISessionService
 {

@@ -1,4 +1,4 @@
-﻿namespace StoryEstimate.Context.Abstract;
+﻿namespace StoryEstimate.Common.Context.Abstract;
 
 internal interface IDictionaryContext<TKey, TValue> where TKey : notnull
 {

@@ -1,6 +1,6 @@
 ﻿using StoryEstimate.Models;
 
-namespace StoryEstimate.Services.Abstract;
+namespace StoryEstimate.Common.Services.Abstract;
 
 public interface ISessionService
 {

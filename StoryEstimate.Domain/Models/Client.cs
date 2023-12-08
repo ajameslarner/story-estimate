@@ -1,4 +1,4 @@
-﻿namespace StoryEstimate.Models;
+﻿namespace StoryEstimate.Domain.Models;
 
 public struct Client
 {

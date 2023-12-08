@@ -1,4 +1,4 @@
-﻿namespace StoryEstimate.Models.Configurations
+﻿namespace StoryEstimate.Domain.Models.Configurations
 {
     public class SessionConfiguration
     {

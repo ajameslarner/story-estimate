@@ -1,4 +1,4 @@
-﻿namespace StoryEstimate.Events
+﻿namespace StoryEstimate.Domain.Models.Misc
 {
     public class SessionTimeoutEventArgs : EventArgs
     {

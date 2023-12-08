@@ -1,26 +1,26 @@
-﻿using StoryEstimate.Events;
+﻿using StoryEstimate.Domain.Models.Misc;
 using System.Collections.Concurrent;
 using Timer = System.Timers.Timer;
 
-namespace StoryEstimate.Models;
+namespace StoryEstimate.Domain.Models;
 
 public class Session
 {
     private Timer? _timeout;
     private int _timeoutValue = 30;
     private string? _name;
-    
+
     public event EventHandler<SessionTimeoutEventArgs>? OnTimeout;
     public string? Id { get; set; }
-    public string? Name 
+    public string? Name
     {
         get
-        { 
+        {
             if (_timeout != null && _timeout.Enabled)
             {
                 return _name + $" ({_timeoutValue})";
             }
-            
+
             return _name;
         }
         set => _name = value;

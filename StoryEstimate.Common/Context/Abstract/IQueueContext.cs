@@ -1,4 +1,4 @@
-﻿namespace StoryEstimate.Context.Abstract;
+﻿namespace StoryEstimate.Common.Context.Abstract;
 
 internal interface IQueueContext<T> where T : struct
 {
